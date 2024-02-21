@@ -1,7 +1,7 @@
-from aws_lambda import lambda_handler
+from model_training import lambda_handler
 
 
-def test_lambda():
+def _test_lambda():
     event = example_s3_event()
     result = lambda_handler(event, None)
     assert result["Records"][0]["eventName"] == "ObjectCreated:Put"
