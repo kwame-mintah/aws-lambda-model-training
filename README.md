@@ -1,18 +1,12 @@
-# AWS Lambda Function Template
+# AWS Lambda Model Training
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3121/)
-<a href="https://github.com/new?template_name=aws-lambda-function-template&template_owner=kwame-mintah">
-  <img src="https://img.shields.io/badge/use%20this-template-blue?logo=github">
-</a>
 
-This is a template project for a AWS Lambda function deployed as a docker image.
+A lambda to split pre-processed data into, training and validation then uploaded to an S3 bucket. Training and validation
+data uploaded to the bucket will be used when triggering the training job.
 
-This repository is intended as a quick-start and includes the following:
-
-- A `Dockerfile` to build the lambda function
-- GitHub Actions to build and push the image to an AWS Elastic Container Registry (ECR)
-- Pre-commit hooks to run on each commit
-- Example unit and feature tests
+This repository does not create the S3 Bucket, this is created via Terraform found here [terraform-aws-machine-learning-pipeline](https://github.com/kwame-mintah/terraform-aws-machine-learning-pipeline).
+For more details on the entire flow and how this lambda is deployed, see [aws-automlops-serverless-deployment](https://github.com/kwame-mintah/aws-automlops-serverless-deployment).
 
 ## Development
 
@@ -27,13 +21,13 @@ This repository is intended as a quick-start and includes the following:
 1. Build the docker image locally:
 
    ```commandline
-   docker build --no-cache -t aws_lambda:local .
+   docker build --no-cache -t model_training:local .
    ```
 
 2. Run the docker image built:
 
    ```commandline
-   docker run --platform linux/amd64 -p 9000:8080 aws_lambda:local
+   docker run --platform linux/amd64 -p 9000:8080 model_training:local
    ```
 
 3. Send an event to the lambda via curl:
@@ -77,7 +71,7 @@ This repository is intended as a quick-start and includes the following:
 
 ## GitHub Action (CI/CD)
 
-The GitHub Action "🚀 Push Docker image to AWS ECR" will checkout the repository and push a docker image to the chosen AWS ECR using
+The GitHub Action "🚀 Push Docker image to AWS ECR" will check out the repository and push a docker image to the chosen AWS ECR using
 [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials/tree/v4.0.1/) action. The following repository secrets need to be set:
 
 | Secret             | Description                  |
