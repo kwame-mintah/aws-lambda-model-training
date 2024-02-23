@@ -1,3 +1,9 @@
+## 0.2.0 (2024-02-23)
+
+### Feat
+
+- **model_training**: implement starting sagemaker training job
+
 ## 0.1.0 (2024-02-21)
 
 ### Feat
