@@ -94,7 +94,11 @@ def lambda_handler(event, context):
     upload_to_output_bucket(
         file_obj_validation, training_output_path_dir + validation_file_name, s3_client
     )
-    logger.info("Finished uploading train: %s and validation: %s files", training_file_name, validation_file_name)
+    logger.info(
+        "Finished uploading train: %s and validation: %s files",
+        training_file_name,
+        validation_file_name,
+    )
 
     # Start SageMaker Training job
     start_sagemaker_training_job(
