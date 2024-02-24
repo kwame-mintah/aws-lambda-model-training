@@ -1,3 +1,9 @@
+## 0.4.1 (2024-02-24)
+
+### Refactor
+
+- **pre_checks_before_processing**: move checking before reading to csv format
+
 ## 0.4.0 (2024-02-24)
 
 ### Feat
