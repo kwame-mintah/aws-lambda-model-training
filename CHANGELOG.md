@@ -1,3 +1,9 @@
+## 0.3.0 (2024-02-24)
+
+### Feat
+
+- **model_training**: change file directory for saving to bucket
+
 ## 0.2.0 (2024-02-23)
 
 ### Feat
