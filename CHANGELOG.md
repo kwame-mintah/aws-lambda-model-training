@@ -1,3 +1,9 @@
+## 0.4.0 (2024-02-24)
+
+### Feat
+
+- **model_training**: check file has not already been processed
+
 ## 0.3.0 (2024-02-24)
 
 ### Feat
