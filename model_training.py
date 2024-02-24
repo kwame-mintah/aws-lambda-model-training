@@ -46,8 +46,13 @@ def lambda_handler(event, context):
         s3_record.object_key,
     )
 
-    # Check the object has not already been processed
-    if pre_checks_before_processing(s3_record.object_key, find_tag="ProcessedTime"):
+    # Check the object is not something previously created by training lambda.
+    if "training" in s3_record.object_key:
+        logger.info(
+            "Will not process object: %s as this was previously created "
+            "for training",
+            s3_record.object_key,
+        )
         return
 
     # Read CSV file for S3 Bucket
@@ -65,6 +70,7 @@ def lambda_handler(event, context):
         model_data.sample(frac=1, random_state=1729),
         [int(0.7 * len(model_data)), int(0.9 * len(model_data))],
     )
+    logger.info("Finished splitting data into training, validation and testing")
 
     # Create readable file-like object for training and validation comma-separated values (csv)
     file_obj_training = io.BytesIO()
@@ -88,34 +94,15 @@ def lambda_handler(event, context):
     upload_to_output_bucket(
         file_obj_validation, training_output_path_dir + validation_file_name, s3_client
     )
+    logger.info("Finished uploading train: %s and validation: %s files", training_file_name, validation_file_name)
 
     # Start SageMaker Training job
     start_sagemaker_training_job(
         region=aws_region, framework="xgboost", version="latest"
     )
 
+    logger.info("Training job started")
     return event
-
-
-def pre_checks_before_processing(
-    key: str, find_tag: str, client: Any = s3_client
-) -> bool:
-    """
-    Check that the object has not been processed previously.
-
-    :param client: boto3 client configured to use s3
-    :param key: The full path for to object
-    :param find_tag: Tag to find on the object
-    :return: bool
-    """
-    object_tags = client.get_object_tagging(
-        Bucket=PREPROCESSED_OUTPUT_BUCKET_NAME, Key=key
-    )
-
-    for tag in object_tags["TagSet"]:
-        if find_tag in tag:
-            logger.info("Object has previously been processed.")
-            return True
 
 
 def upload_to_output_bucket(
