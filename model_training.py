@@ -28,7 +28,7 @@ MODEL_OUTPUT_BUCKET_NAME = os.environ.get("MODEL_OUTPUT_BUCKET_NAME")
 PREPROCESSED_OUTPUT_BUCKET_NAME = os.environ.get("PREPROCESSED_OUTPUT_BUCKET_NAME")
 
 # Filepath formatting when uploading to S3 bucket
-training_output_path_dir = "training/%s" % str(datetime.now().strftime("%Y-%m-%d"))
+training_output_path_dir = "automl/%s/training" % str(datetime.now().strftime("%Y-%m-%d"))
 training_file_name = "/train/train_%s.csv" % str(datetime.now().strftime("%H_%M_%S"))
 validation_file_name = "/validation/validation_%s.csv" % str(
     datetime.now().strftime("%H_%M_%S")
