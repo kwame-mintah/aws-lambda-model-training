@@ -45,11 +45,13 @@ def lambda_handler(event, context):
         s3_record.bucket_name,
         s3_record.object_key,
     )
-    # Read CSV file for S3 Bucket
-    data = pd.read_csv("s3://" + s3_record.bucket_name + "/" + s3_record.object_key)
 
+    # Check the object has not already been processed
     if pre_checks_before_processing(s3_record.object_key, find_tag="ProcessedTime"):
         return
+
+    # Read CSV file for S3 Bucket
+    data = pd.read_csv("s3://" + s3_record.bucket_name + "/" + s3_record.object_key)
 
     # Make sure we can see all the columns
     pd.set_option("display.max_columns", 500)
@@ -99,7 +101,7 @@ def pre_checks_before_processing(
     key: str, find_tag: str, client: Any = s3_client
 ) -> bool:
     """
-    Check that the object is a csv file and has not been processed previously.
+    Check that the object has not been processed previously.
 
     :param client: boto3 client configured to use s3
     :param key: The full path for to object
