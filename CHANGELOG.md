@@ -1,3 +1,9 @@
+## 0.4.2 (2024-02-24)
+
+### Refactor
+
+- **lambda_handler**: remove `pre_checks_before_processing` function and only check object key
+
 ## 0.4.1 (2024-02-24)
 
 ### Refactor
