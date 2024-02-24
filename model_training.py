@@ -28,7 +28,9 @@ MODEL_OUTPUT_BUCKET_NAME = os.environ.get("MODEL_OUTPUT_BUCKET_NAME")
 PREPROCESSED_OUTPUT_BUCKET_NAME = os.environ.get("PREPROCESSED_OUTPUT_BUCKET_NAME")
 
 # Filepath formatting when uploading to S3 bucket
-training_output_path_dir = "automl/%s/training" % str(datetime.now().strftime("%Y-%m-%d"))
+training_output_path_dir = "automl/%s/training" % str(
+    datetime.now().strftime("%Y-%m-%d")
+)
 training_file_name = "/train/train_%s.csv" % str(datetime.now().strftime("%H_%M_%S"))
 validation_file_name = "/validation/validation_%s.csv" % str(
     datetime.now().strftime("%H_%M_%S")
@@ -45,6 +47,9 @@ def lambda_handler(event, context):
     )
     # Read CSV file for S3 Bucket
     data = pd.read_csv("s3://" + s3_record.bucket_name + "/" + s3_record.object_key)
+
+    if pre_checks_before_processing(s3_record.object_key, find_tag="ProcessedTime"):
+        return
 
     # Make sure we can see all the columns
     pd.set_option("display.max_columns", 500)
@@ -88,6 +93,27 @@ def lambda_handler(event, context):
     )
 
     return event
+
+
+def pre_checks_before_processing(
+    key: str, find_tag: str, client: Any = s3_client
+) -> bool:
+    """
+    Check that the object is a csv file and has not been processed previously.
+
+    :param client: boto3 client configured to use s3
+    :param key: The full path for to object
+    :param find_tag: Tag to find on the object
+    :return: bool
+    """
+    object_tags = client.get_object_tagging(
+        Bucket=PREPROCESSED_OUTPUT_BUCKET_NAME, Key=key
+    )
+
+    for tag in object_tags["TagSet"]:
+        if find_tag in tag:
+            logger.info("Object has previously been processed.")
+            return True
 
 
 def upload_to_output_bucket(
