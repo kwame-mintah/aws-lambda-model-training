@@ -1,6 +1,6 @@
 # AWS Lambda Model Training
 
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3121/)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![🚧 Bump version](https://github.com/kwame-mintah/aws-lambda-model-training/actions/workflows/bump-repository-version.yml/badge.svg)](https://github.com/kwame-mintah/aws-lambda-model-training/actions/workflows/bump-repository-version.yml)
 [![🚀 Push Docker image to AWS ECR](https://github.com/kwame-mintah/aws-lambda-model-training/actions/workflows/push-docker-image-to-aws-ecr.yml/badge.svg)](https://github.com/kwame-mintah/aws-lambda-model-training/actions/workflows/push-docker-image-to-aws-ecr.yml)
 [![🧹 Run linter](https://github.com/kwame-mintah/aws-lambda-model-training/actions/workflows/run-python-linter.yml/badge.svg)](https://github.com/kwame-mintah/aws-lambda-model-training/actions/workflows/run-python-linter.yml)
