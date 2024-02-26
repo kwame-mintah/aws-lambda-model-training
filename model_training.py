@@ -55,7 +55,7 @@ def lambda_handler(event, context):
         )
         return
 
-    # Read CSV file for S3 Bucket
+    # Read CSV file from S3 Bucket
     data = pd.read_csv("s3://" + s3_record.bucket_name + "/" + s3_record.object_key)
 
     # Make sure we can see all the columns
@@ -66,6 +66,8 @@ def lambda_handler(event, context):
     model_data = pd.get_dummies(data, dtype=float)
 
     # Randomly sort the data then split out first 70%, second 20%, and last 10%
+    # Ignore warning message output when running `np.split()` see GitHub issue:
+    # https://github.com/numpy/numpy/issues/24889
     train_data, validation_data, test_data = np.split(
         model_data.sample(frac=1, random_state=1729),
         [int(0.7 * len(model_data)), int(0.9 * len(model_data))],
