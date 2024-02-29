@@ -38,6 +38,13 @@ validation_file_name = "/validation/validation_%s.csv" % str(
 
 
 def lambda_handler(event, context):
+    """
+    Split preprocessed data into training and validation for training job.
+
+    :param event: S3 Event
+    :param context:
+    :return:
+    """
     s3_record = S3Record(event)
     logger.info(
         "Received event: %s on bucket: %s for object: %s",
