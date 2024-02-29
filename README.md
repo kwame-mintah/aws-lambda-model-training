@@ -15,7 +15,7 @@ For more details on the entire flow and how this lambda is deployed, see [aws-au
 
 ### Dependencies
 
-- [Python](https://www.python.org/downloads/release/python-3121/)
+- [Python](https://www.python.org/downloads/release/python-3110/)
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop/)
 - [Amazon Web Services](https://aws.amazon.com/?nc2=h_lg)
 
