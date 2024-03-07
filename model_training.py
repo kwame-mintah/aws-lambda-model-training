@@ -165,6 +165,8 @@ def start_sagemaker_training_job(
         region=region, framework=framework, version=version
     )
 
+    # Create a definition for input data used by an SageMaker training job.
+    # https://sagemaker.readthedocs.io/en/stable/api/utility/inputs.html
     s3_input_train = sagemaker.inputs.TrainingInput(
         s3_data="s3://{}/{}".format(
             PREPROCESSED_OUTPUT_BUCKET_NAME,
