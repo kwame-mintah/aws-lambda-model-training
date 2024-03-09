@@ -61,10 +61,10 @@ For more details on the entire flow and how this lambda is deployed, see [aws-au
              "arn": "arn:aws:s3:::example-bucket"
            },
            "object": {
-             "key": "test%2Fkey",
-             "size": 1024,
-             "eTag": "0123456789abcdef0123456789abcdef",
-             "sequencer": "0A1B2C3D4E5F678901"
+             "key": "data/example-bank-file.csv",
+             "size": 515246,
+             "eTag": "0e29c0d99c654bbe83c42097c97743ed",
+             "sequencer": "00656A54CA3D69362D"
            }
          }
        }
@@ -78,7 +78,7 @@ The GitHub Action "🚀 Push Docker image to AWS ECR" will check out the reposit
 [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials/tree/v4.0.1/) action. The following repository secrets need to be set:
 
 | Secret             | Description                  |
-| ------------------ | ---------------------------- |
+|--------------------|------------------------------|
 | AWS_REGION         | The AWS Region.              |
 | AWS_ACCOUNT_ID     | The AWS account ID.          |
 | AWS_ECR_REPOSITORY | The AWS ECR repository name. |
