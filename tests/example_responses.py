@@ -50,7 +50,7 @@ def example_s3_event():
                         "arn": "arn:aws:s3:::test-noverycool-2139",
                     },
                     "object": {
-                        "key": "automl/2024-02-24/training/bank-additional-full.csv",
+                        "key": "data/example-bank-file.csv",
                         "size": 515246,
                         "eTag": "0e29c0d99c654bbe83c42097c97743ed",
                         "sequencer": "00656A54CA3D69362D",
