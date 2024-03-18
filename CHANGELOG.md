@@ -1,3 +1,9 @@
+## 0.5.0 (2024-03-18)
+
+### Feat
+
+- **model_training**: upload test data for model evaluation
+
 ## 0.4.2 (2024-02-24)
 
 ### Refactor
