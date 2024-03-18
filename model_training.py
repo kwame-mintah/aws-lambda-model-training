@@ -35,6 +35,7 @@ training_file_name = "/train/train_%s.csv" % str(datetime.now().strftime("%H_%M_
 validation_file_name = "/validation/validation_%s.csv" % str(
     datetime.now().strftime("%H_%M_%S")
 )
+testing_file_name = "/testing/test_%s.csv" % str(datetime.now().strftime("%H_%M_%S"))
 
 
 def lambda_handler(event, context):
@@ -84,6 +85,7 @@ def lambda_handler(event, context):
     # Create readable file-like object for training and validation comma-separated values (csv)
     file_obj_training = io.BytesIO()
     file_obj_validation = io.BytesIO()
+    file_obj_test = io.BytesIO()
 
     # Concatenate pandas objects and write to csv file
     pd.concat(
@@ -95,6 +97,8 @@ def lambda_handler(event, context):
         axis=1,
     ).to_csv(file_obj_validation, index=False, header=False)
     file_obj_validation.seek(0)
+    pd.concat([test_data]).to_csv(file_obj_test, index=False, header=False)
+    file_obj_test.seek(0)
 
     # Copy the file to S3 for training to pick up
     upload_to_output_bucket(
@@ -103,6 +107,12 @@ def lambda_handler(event, context):
     upload_to_output_bucket(
         file_obj_validation, training_output_path_dir + validation_file_name, s3_client
     )
+
+    # Copy test data to S3 for testing
+    upload_to_output_bucket(
+        file_obj_test, training_output_path_dir + testing_file_name, s3_client
+    )
+
     logger.info(
         "Finished uploading train: %s and validation: %s files",
         training_file_name,
