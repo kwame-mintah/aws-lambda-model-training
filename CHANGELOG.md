@@ -1,3 +1,9 @@
+## 0.6.0 (2024-04-07)
+
+### Feat
+
+- **pre-commit-config**: update black and commitizen versions
+
 ## 0.5.0 (2024-03-18)
 
 ### Feat
