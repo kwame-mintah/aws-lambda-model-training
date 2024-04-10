@@ -100,7 +100,7 @@ def lambda_handler(event, context):
     pd.concat([test_data]).to_csv(file_obj_test, index=False, header=False)
     file_obj_test.seek(0)
 
-    # Copy the file to S3 for training to pick up
+    # Copy the file to S3 for training
     upload_to_output_bucket(
         file_obj_training, training_output_path_dir + training_file_name, s3_client
     )
@@ -205,6 +205,17 @@ def start_sagemaker_training_job(
         output_path="s3://{}/{}/output".format(
             MODEL_OUTPUT_BUCKET_NAME, str(datetime.now().strftime("%Y-%m-%d"))
         ),
+        tags=[
+            {"Key": "Project", "Value": "MLOps"},
+            {"Key": "Region", "Value": aws_region},
+            {
+                "Key": "Testing",
+                "Value": "s3://{}/{}".format(
+                    PREPROCESSED_OUTPUT_BUCKET_NAME,
+                    training_output_path_dir + testing_file_name,
+                ),
+            },
+        ],
         sagemaker_session=sagemaker_session,
     )
 
