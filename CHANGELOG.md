@@ -1,3 +1,9 @@
+## 0.6.1 (2024-04-10)
+
+### Refactor
+
+- **start_sagemaker_training_job**: add tagging to training jobs
+
 ## 0.6.0 (2024-04-07)
 
 ### Feat
