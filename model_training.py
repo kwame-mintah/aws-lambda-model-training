@@ -21,11 +21,8 @@ s3_client = boto3.client("s3", region_name=aws_region)
 logger = logging.getLogger("model-training")
 logger.setLevel(logging.INFO)
 
-# The model output bucket name
-MODEL_OUTPUT_BUCKET_NAME = os.environ.get("MODEL_OUTPUT_BUCKET_NAME")
-
-# The output bucket name
-PREPROCESSED_OUTPUT_BUCKET_NAME = os.environ.get("PREPROCESSED_OUTPUT_BUCKET_NAME")
+# The environment the lambda is currently deployed in
+SERVERLESS_ENVIRONMENT = os.environ.get("SERVERLESS_ENVIRONMENT")
 
 # Filepath formatting when uploading to S3 bucket
 training_output_path_dir = "automl/%s/training" % str(
@@ -36,6 +33,13 @@ validation_file_name = "/validation/validation_%s.csv" % str(
     datetime.now().strftime("%H_%M_%S")
 )
 testing_file_name = "/testing/test_%s.csv" % str(datetime.now().strftime("%H_%M_%S"))
+
+ssm_preprocessed_output_bucket_name = (
+    "mlops-eu-west-2-%s-automl-data" % SERVERLESS_ENVIRONMENT
+)
+ssm_model_output_bucket_name = (
+    "mlops-eu-west-2-%s-model-output" % SERVERLESS_ENVIRONMENT
+)
 
 
 def lambda_handler(event, context):
@@ -87,6 +91,11 @@ def lambda_handler(event, context):
     file_obj_validation = io.BytesIO()
     file_obj_test = io.BytesIO()
 
+    # Get output bucket name from parameter store for csvs
+    preprocessed_output_bucket_name = get_parameter_store_value(
+        name=ssm_preprocessed_output_bucket_name
+    )
+
     # Concatenate pandas objects and write to csv file
     pd.concat(
         [train_data["y_yes"], train_data.drop(["y_no", "y_yes"], axis=1)], axis=1
@@ -100,48 +109,65 @@ def lambda_handler(event, context):
     pd.concat([test_data]).to_csv(file_obj_test, index=False, header=False)
     file_obj_test.seek(0)
 
-    # Copy the file to S3 for training
+    # Upload the file to S3 for training
     upload_to_output_bucket(
-        file_obj_training, training_output_path_dir + training_file_name, s3_client
+        bucket_name=preprocessed_output_bucket_name,
+        file_obj=file_obj_training,
+        key=training_output_path_dir + training_file_name,
     )
     upload_to_output_bucket(
-        file_obj_validation, training_output_path_dir + validation_file_name, s3_client
+        bucket_name=preprocessed_output_bucket_name,
+        file_obj=file_obj_validation,
+        key=training_output_path_dir + validation_file_name,
     )
 
-    # Copy test data to S3 for testing
+    # Upload test data to S3 for testing
     upload_to_output_bucket(
-        file_obj_test, training_output_path_dir + testing_file_name, s3_client
+        bucket_name=preprocessed_output_bucket_name,
+        file_obj=file_obj_test,
+        key=training_output_path_dir + testing_file_name,
     )
 
     logger.info(
-        "Finished uploading train: %s and validation: %s files",
+        "Finished uploading train: %s, validation: %s and test: %s files",
         training_file_name,
         validation_file_name,
+        testing_file_name,
     )
+
+    # Get model output bucket name
+    model_bucket_name = get_parameter_store_value(name=ssm_model_output_bucket_name)
 
     # Start SageMaker Training job
     start_sagemaker_training_job(
-        region=aws_region, framework="xgboost", version="latest"
+        region=aws_region,
+        framework="xgboost",
+        version="latest",
+        bucket_name=preprocessed_output_bucket_name,
+        model_output_bucket_name=model_bucket_name,
     )
 
-    logger.info("Training job started")
+    logger.info(
+        "Training job started, model output can be found in bucket: %s",
+        model_bucket_name,
+    )
     return event
 
 
 def upload_to_output_bucket(
-    file_obj: io.BytesIO, key: str, client: Any = s3_client
+    bucket_name: str, file_obj: io.BytesIO, key: str, client: Any = s3_client
 ) -> None:
     """
     Upload the file object to the output s3 bucket.
 
+    :param bucket_name: The bucket name to upload the object.
     :param client: boto3 client configured to use s3
     :param file_obj: The DataFrame as a csv
     :param key: The full path to the object destination
-    :return:
     """
     client.put_object(
         Body=file_obj,
-        Bucket=PREPROCESSED_OUTPUT_BUCKET_NAME,
+        Bucket=bucket_name,
         Tagging="ProcessedTime=%s" % str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         Key=key,
     )
@@ -151,6 +177,8 @@ def start_sagemaker_training_job(
     region: str,
     framework: str,
     version: str,
+    bucket_name: str,
+    model_output_bucket_name: str,
     sagemaker_role: str = "SageMakerExecutionRole",
     instance_count: int = 1,
     instance_type: str = "ml.m4.xlarge",
@@ -163,10 +191,11 @@ def start_sagemaker_training_job(
     :param region: The AWS region.
     :param framework: The name of the framework or algorithm.
     :param version: The framework or algorithm version.
+    :param bucket_name: The bucket containing the training / validation data.
+    :param model_output_bucket_name: The S3 bucket name for saving the training result.
     :param sagemaker_role: An AWS IAM role (either name or full ARN).
     :param instance_count: Number of Amazon EC2 instances to use for training.
-    :param instance_type: Type of EC2 instance to use for training
-    :return:
+    :param instance_type: Type of EC2 instance to use for training.
     """
 
     # Specify the algorithm container
@@ -179,7 +208,7 @@ def start_sagemaker_training_job(
     # https://sagemaker.readthedocs.io/en/stable/api/utility/inputs.html
     s3_input_train = sagemaker.inputs.TrainingInput(
         s3_data="s3://{}/{}".format(
-            PREPROCESSED_OUTPUT_BUCKET_NAME,
+            bucket_name,
             training_output_path_dir + training_file_name,
         ),
         content_type="csv",
@@ -187,7 +216,7 @@ def start_sagemaker_training_job(
 
     s3_input_validation = sagemaker.inputs.TrainingInput(
         s3_data="s3://{}/{}".format(
-            PREPROCESSED_OUTPUT_BUCKET_NAME,
+            bucket_name,
             training_output_path_dir + validation_file_name,
         ),
         content_type="csv",
@@ -203,7 +232,7 @@ def start_sagemaker_training_job(
         instance_count=instance_count,
         instance_type=instance_type,
         output_path="s3://{}/{}/output".format(
-            MODEL_OUTPUT_BUCKET_NAME, str(datetime.now().strftime("%Y-%m-%d"))
+            model_output_bucket_name, str(datetime.now().strftime("%Y-%m-%d"))
         ),
         tags=[
             {"Key": "Project", "Value": "MLOps"},
@@ -211,7 +240,7 @@ def start_sagemaker_training_job(
             {
                 "Key": "Testing",
                 "Value": "s3://{}/{}".format(
-                    PREPROCESSED_OUTPUT_BUCKET_NAME,
+                    bucket_name,
                     training_output_path_dir + testing_file_name,
                 ),
             },
