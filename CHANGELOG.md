@@ -1,3 +1,13 @@
+## 0.7.0 (2024-04-22)
+
+### Feat
+
+- **get_parameter_store_value**: add function to get parameter store values
+
+### Refactor
+
+- **model_training**: no longer use env var for bucket names
+
 ## 0.6.1 (2024-04-10)
 
 ### Refactor
