@@ -28,13 +28,21 @@ def test_lambda_handler(monkeypatch):
     pd.read_csv = Mock()
     pd.read_csv.return_value = data
 
-    def uploaded_to_bucket(file_obj, key, client):
+    def uploaded_to_bucket(bucket_name, file_obj, key):
         """
         Stub uploading to bucket
         """
         return None
 
-    def start_sagemaker_training(region, framework, version):
+    def ssm_value(name):
+        """
+        Stub parameter store retrieval
+        """
+        return "value"
+
+    def start_sagemaker_training(
+        region, framework, version, bucket_name, model_output_bucket_name
+    ):
         """
         Stub uploading to bucket
         """
@@ -45,6 +53,8 @@ def test_lambda_handler(monkeypatch):
     monkeypatch.setattr(
         model_training, "start_sagemaker_training_job", start_sagemaker_training
     )
+
+    monkeypatch.setattr(model_training, "get_parameter_store_value", ssm_value)
 
     result = lambda_handler(example_s3_event(), None)
     assert result["Records"][0]["eventName"] == "ObjectCreated:Put"
@@ -59,7 +69,15 @@ def test_upload_to_output_bucket():
     file_obj = io.BytesIO()
 
     with stubber:
-        assert upload_to_output_bucket(file_obj, LOCAL_TEST_FILENAME, s3_client) is None
+        assert (
+            upload_to_output_bucket(
+                bucket_name="bucket",
+                file_obj=file_obj,
+                key=LOCAL_TEST_FILENAME,
+                client=s3_client,
+            )
+            is None
+        )
 
 
 def test_start_sagemaker_training_job():
@@ -92,7 +110,11 @@ def test_start_sagemaker_training_job():
 
     assert (
         start_sagemaker_training_job(
-            region=REGION, framework="xgboost", version="latest"
+            region=REGION,
+            framework="xgboost",
+            version="latest",
+            bucket_name="bucket",
+            model_output_bucket_name="model-bucket",
         )
         is None
     )
