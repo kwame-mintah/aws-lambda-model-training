@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def example_get_put_object():
     """
     Example response when putting a tag onto a
@@ -58,4 +61,24 @@ def example_s3_event():
                 },
             }
         ]
+    }
+
+
+def example_parameters_response():
+    """
+    Example response when retrieving parameter store value.
+    :return:
+    """
+    return {
+        "Parameter": {
+            "Name": "string",
+            "Type": "String",
+            "Value": "string",
+            "Version": 123,
+            "Selector": "string",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": "string",
+            "DataType": "string",
+        }
     }

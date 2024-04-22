@@ -11,6 +11,7 @@ import model_training
 from example_responses import (
     example_get_put_object,
     example_s3_event,
+    example_parameters_response,
 )
 from model_training import (
     lambda_handler,
@@ -118,3 +119,18 @@ def test_start_sagemaker_training_job():
         )
         is None
     )
+
+
+def test_get_parameter_store_value():
+    ssm_client = botocore.session.get_session().create_client("ssm")
+    stubber = Stubber(ssm_client)
+    expected_params = {"Name": ANY, "WithDecryption": True}
+    stubber.add_response(
+        "get_parameter", example_parameters_response(), expected_params
+    )
+
+    with stubber:
+        assert (
+            model_training.get_parameter_store_value("unit-test", ssm_client)
+            == "string"
+        )
