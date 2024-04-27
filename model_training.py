@@ -234,6 +234,14 @@ def start_sagemaker_training_job(
         output_path="s3://{}/{}/output".format(
             model_output_bucket_name, str(datetime.now().strftime("%Y-%m-%d"))
         ),
+        # Describing a training job does not return tag(s) as of 27/04/2025 (Boto3 1.34.93),
+        # have to set an environment variable, which is part of the response.
+        # Ideally, environment variables set would reflect the training environment.
+        environment={
+            "TEST_DATA_LOCATION": "s3://{}/{}".format(
+                bucket_name, training_output_path_dir + testing_file_name
+            )
+        },
         tags=[
             {"Key": "Project", "Value": "MLOps"},
             {"Key": "Region", "Value": aws_region},
