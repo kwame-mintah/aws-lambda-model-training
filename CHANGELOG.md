@@ -1,3 +1,9 @@
+## 0.7.1 (2024-04-27)
+
+### Refactor
+
+- **start_sagemaker_training_job**: include location of test data in environment variables
+
 ## 0.7.0 (2024-04-22)
 
 ### Feat
