@@ -1,3 +1,9 @@
+## 0.7.2 (2024-05-08)
+
+### Refactor
+
+- **start_sagemaker_training_job**: dont set environment variable in training job
+
 ## 0.7.1 (2024-04-27)
 
 ### Refactor
