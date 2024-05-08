@@ -237,11 +237,15 @@ def start_sagemaker_training_job(
         # Describing a training job does not return tag(s) as of 27/04/2025 (Boto3 1.34.93),
         # have to set an environment variable, which is part of the response.
         # Ideally, environment variables set would reflect the training environment.
-        environment={
-            "TEST_DATA_LOCATION": "s3://{}/{}".format(
-                bucket_name, training_output_path_dir + testing_file_name
-            )
-        },
+        # Environment variables are not allowed when using SageMaker built-in algorithm
+        # https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html#algorithms-built-in-supervised-learning
+        # Alternatively, use `list_tags`, which requires the full ARN to work as expected
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sagemaker/client/list_tags.html
+        # environment={
+        #     "TEST_DATA_LOCATION": "s3://{}/{}".format(
+        #         bucket_name, training_output_path_dir + testing_file_name
+        #     )
+        # },
         tags=[
             {"Key": "Project", "Value": "MLOps"},
             {"Key": "Region", "Value": aws_region},
