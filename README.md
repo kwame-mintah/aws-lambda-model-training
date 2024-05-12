@@ -11,6 +11,30 @@ data uploaded to the bucket will be used when triggering the training job.
 This repository does not create the S3 Bucket, this is created via Terraform found here [terraform-aws-machine-learning-pipeline](https://github.com/kwame-mintah/terraform-aws-machine-learning-pipeline).
 For more details on the entire flow and how this lambda is deployed, see [aws-automlops-serverless-deployment](https://github.com/kwame-mintah/aws-automlops-serverless-deployment).
 
+# Flowchart
+
+The [diagram below](https://mermaid.js.org/syntax/flowchart.html#flowcharts-basic-syntax) demonstrates what happens when the lambda is trigger, when a new `.csv` object has been uploaded to the S3 Bucket.
+
+```mermaid
+graph LR
+  S0(Start)
+  T1(Dataset pulled from S3 Bucket)
+  T2(Random split and sort using Numpy)
+  T3[["`70% training data
+    20% validation data
+    10% test data`"]]
+  T4("Upload split data into S3 Bucket as `.csv`")
+  T5("Start training job with training and validation data")
+  E0(End)
+
+  S0-->T1
+  T1-->T2
+  T2-->T3
+  T3-->T4
+  T4-->T5
+  T5-->E0
+```
+
 ## Development
 
 ### Dependencies
@@ -78,7 +102,7 @@ The GitHub Action "🚀 Push Docker image to AWS ECR" will check out the reposit
 [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials/tree/v4.0.1/) action. The following repository secrets need to be set:
 
 | Secret             | Description                  |
-|--------------------|------------------------------|
+| ------------------ | ---------------------------- |
 | AWS_REGION         | The AWS Region.              |
 | AWS_ACCOUNT_ID     | The AWS account ID.          |
 | AWS_ECR_REPOSITORY | The AWS ECR repository name. |
