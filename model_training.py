@@ -99,14 +99,14 @@ def lambda_handler(event, context):
     # Concatenate pandas objects and write to csv file
     pd.concat(
         [train_data["y_yes"], train_data.drop(["y_no", "y_yes"], axis=1)], axis=1
-    ).to_csv(file_obj_training, index=False, header=False)
+    ).to_csv(path_or_buf=file_obj_training, index=False, header=False)
     file_obj_training.seek(0)
     pd.concat(
         [validation_data["y_yes"], validation_data.drop(["y_no", "y_yes"], axis=1)],
         axis=1,
-    ).to_csv(file_obj_validation, index=False, header=False)
+    ).to_csv(path_or_buf=file_obj_validation, index=False, header=False)
     file_obj_validation.seek(0)
-    pd.concat([test_data]).to_csv(file_obj_test, index=False, header=False)
+    pd.concat([test_data]).to_csv(path_or_buf=file_obj_test, index=False, header=False)
     file_obj_test.seek(0)
 
     # Upload the file to S3 for training
