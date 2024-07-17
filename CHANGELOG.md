@@ -1,3 +1,9 @@
+## 0.7.3 (2024-07-17)
+
+### Refactor
+
+- **lambda_handler**: use named argument for pandas `to_csv`
+
 ## 0.7.2 (2024-05-08)
 
 ### Refactor
