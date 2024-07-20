@@ -1,3 +1,9 @@
+## 0.7.4 (2024-07-20)
+
+### Refactor
+
+- **test_data**: ensure test rows have same number of features used for training
+
 ## 0.7.3 (2024-07-17)
 
 ### Refactor
