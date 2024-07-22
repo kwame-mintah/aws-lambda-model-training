@@ -15,7 +15,7 @@ from models import S3Record
 aws_region = os.environ.get("AWS_REGION", "eu-west-2")
 
 # Configure S3 client
-s3_client = boto3.client("s3", region_name=aws_region)
+s3_client = boto3.client(service_name="s3", region_name=aws_region)
 
 # Configure logging
 logger = logging.getLogger("model-training")
@@ -50,7 +50,7 @@ def lambda_handler(event, context):
     :param context:
     :return:
     """
-    s3_record = S3Record(event)
+    s3_record = S3Record(event=event)
     logger.info(
         "Received event: %s on bucket: %s for object: %s",
         s3_record.event_name,
@@ -68,21 +68,16 @@ def lambda_handler(event, context):
         return
 
     # Read CSV file from S3 Bucket
-    data = pd.read_csv("s3://" + s3_record.bucket_name + "/" + s3_record.object_key)
-
-    # Make sure we can see all the columns
-    pd.set_option("display.max_columns", 500)
-
-    # Keep the output on one page
-    pd.set_option("display.max_rows", 20)
-    model_data = pd.get_dummies(data, dtype=float)
+    data = pd.read_csv(
+        filepath_or_buffer="s3://" + s3_record.bucket_name + "/" + s3_record.object_key
+    )
 
     # Randomly sort the data then split out first 70%, second 20%, and last 10%
     # Ignore warning message output when running `np.split()` see GitHub issue:
     # https://github.com/numpy/numpy/issues/24889
     train_data, validation_data, test_data = np.split(
-        model_data.sample(frac=1, random_state=1729),
-        [int(0.7 * len(model_data)), int(0.9 * len(model_data))],
+        ary=data.sample(frac=1, random_state=1729),
+        indices_or_sections=[int(0.7 * len(data)), int(0.9 * len(data))],
     )
     logger.info("Finished splitting data into training, validation and testing")
 
@@ -106,9 +101,7 @@ def lambda_handler(event, context):
         axis=1,
     ).to_csv(path_or_buf=file_obj_validation, index=False, header=False)
     file_obj_validation.seek(0)
-    pd.concat([test_data, test_data.drop(["y_no", "y_yes"], axis=1)]).to_csv(
-        path_or_buf=file_obj_test, index=False, header=False
-    )
+    pd.concat([test_data]).to_csv(path_or_buf=file_obj_test)
     file_obj_test.seek(0)
 
     # Upload the file to S3 for training
