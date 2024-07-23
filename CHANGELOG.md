@@ -1,3 +1,9 @@
+## 0.7.5 (2024-07-23)
+
+### Refactor
+
+- **lambda_handler**: remove `set_option` from code
+
 ## 0.7.4 (2024-07-20)
 
 ### Refactor
