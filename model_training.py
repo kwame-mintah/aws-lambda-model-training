@@ -229,18 +229,6 @@ def start_sagemaker_training_job(
         output_path="s3://{}/{}/output".format(
             model_output_bucket_name, str(datetime.now().strftime("%Y-%m-%d"))
         ),
-        # Describing a training job does not return tag(s) as of 27/04/2025 (Boto3 1.34.93),
-        # have to set an environment variable, which is part of the response.
-        # Ideally, environment variables set would reflect the training environment.
-        # Environment variables are not allowed when using SageMaker built-in algorithm
-        # https://docs.aws.amazon.com/sagemaker/latest/dg/algos.html#algorithms-built-in-supervised-learning
-        # Alternatively, use `list_tags`, which requires the full ARN to work as expected
-        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sagemaker/client/list_tags.html
-        # environment={
-        #     "TEST_DATA_LOCATION": "s3://{}/{}".format(
-        #         bucket_name, training_output_path_dir + testing_file_name
-        #     )
-        # },
         tags=[
             {"Key": "Project", "Value": "MLOps"},
             {"Key": "Region", "Value": aws_region},
@@ -276,7 +264,7 @@ def start_sagemaker_training_job(
 
 
 def get_parameter_store_value(
-    name: str, client: Any = boto3.client("ssm", region_name=aws_region)
+    name: str, client: Any = boto3.client(service_name="ssm", region_name=aws_region)
 ) -> str:
     """
     Get a parameter store value from AWS.
