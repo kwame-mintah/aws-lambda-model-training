@@ -1,3 +1,9 @@
+## 0.7.6 (2024-08-17)
+
+### Refactor
+
+- **s3_bucket_interpolation**: reduce code duplication
+
 ## 0.7.5 (2024-07-23)
 
 ### Refactor
