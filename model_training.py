@@ -41,6 +41,9 @@ ssm_model_output_bucket_name = (
     "mlops-eu-west-2-%s-model-output" % SERVERLESS_ENVIRONMENT
 )
 
+# Bucket name containing training data
+s3_bucket_interpolation = "s3://{}/{}"
+
 
 def lambda_handler(event, context):
     """
@@ -202,7 +205,7 @@ def start_sagemaker_training_job(
     # Create a definition for input data used by an SageMaker training job.
     # https://sagemaker.readthedocs.io/en/stable/api/utility/inputs.html
     s3_input_train = sagemaker.inputs.TrainingInput(
-        s3_data="s3://{}/{}".format(
+        s3_data=s3_bucket_interpolation.format(
             bucket_name,
             training_output_path_dir + training_file_name,
         ),
@@ -210,7 +213,7 @@ def start_sagemaker_training_job(
     )
 
     s3_input_validation = sagemaker.inputs.TrainingInput(
-        s3_data="s3://{}/{}".format(
+        s3_data=s3_bucket_interpolation.format(
             bucket_name,
             training_output_path_dir + validation_file_name,
         ),
@@ -234,7 +237,7 @@ def start_sagemaker_training_job(
             {"Key": "Region", "Value": aws_region},
             {
                 "Key": "Testing",
-                "Value": "s3://{}/{}".format(
+                "Value": s3_bucket_interpolation.format(
                     bucket_name,
                     training_output_path_dir + testing_file_name,
                 ),
